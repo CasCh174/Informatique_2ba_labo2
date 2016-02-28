@@ -1,8 +1,11 @@
 from socket import *
 
-HOST = '' #localhost
+
+print ('Hi! ')
+
+HOST = 'localhost' #localhost
 #lan 192.168.1.1
-PORT = 8000 #place of a computer where information goes in and out
+PORT = 8800 #place of a computer where information goes in and out
 s= socket (AF_INET , SOCK_STREAM ) #defines how the socket is gonna work
 s.bind((HOST, PORT))
 s.listen (1) #how many connections it can receive at one time
