@@ -129,7 +129,6 @@ class Chat:
 
                     backadress = addmsg[1], int(addmsg[2])
                     backclient = addmsg[3]
-                    message = addmsg[4]
                     print(backclient, ' : ', message)
 
 
