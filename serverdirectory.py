@@ -148,9 +148,6 @@ class Chat:
                     print('> {} : {}'.format(addmsg[3], addmsg[4]))
                     print("Reply:  ")
 
-
-
-
             except socket.timeout:
                 pass
             except OSError:
