@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-# chat.py
-# author: Sébastien Combéfis
-# version: February 15, 2016
+
 
 import socket
 import sys
@@ -15,8 +12,8 @@ class Chat:
         self.__myadress = (host, port)
         self.__s = s
         print('Écoute sur {}:{}'.format(host, port))
-        
-        
+
+
     def run(self):
         handlers = {
             '/exit': self._exit,
@@ -25,12 +22,15 @@ class Chat:
             '/register': self._register,
             '/connected': self._connected,
             '/list': self._list,
-            '/send': self._send
+            '/send': self._send,
+            '/chat': self._startchat
+
         }
         self.__serveradress = (socket.gethostname(), 5000)
         self.__running = True
         self.__address = None
         self.__clientlist= []
+        self.__clientpseudo = ''
         threading.Thread(target=self._receive).start()
         while self.__running:
             line = sys.stdin.readline().rstrip() + ' '
@@ -52,10 +52,12 @@ class Chat:
         self.__address = None
         self.__s.close()
     def _add(self, host, port, pseudo):
-        self.__clientlist[:] = (host, port, pseudo)
-        
+        self.__clientlist.append((host, port, pseudo))
+        self.__clientpseudo = pseudo
+
+
     def _quit(self):
-        self.__address = None   
+        self.__address = None
     def _send(self, param):
         if self.__address is not None:
             try:
@@ -82,7 +84,7 @@ class Chat:
         tokens = param.split(' ')
         if len(tokens) == 2:
             try:
-                #rm socket__serevraddress.gethostbyaddr()[0] because adding .home to the name 
+                #rm socket__serevraddress.gethostbyaddr()[0] because adding .home to the name
                 self.__address = (tokens[0], int(tokens[1]))
                 print('Connecté à {}:{}'.format(*self.__address))
             except OSError:
@@ -101,23 +103,77 @@ class Chat:
                     self._add(addmsg[1], addmsg[2], addmsg[3])
                 if  addmsg[0] == 'connected':
                     self._connectedlist(addmsg[1], addmsg[2])
-                if addmsg[0] == 'chat':
-                    clientadresschat = (addmsg[1], addmsg[2])
+                if addmsg[0] == 'startchat':
+                    receiver = addmsg[3]
+                    for client in self.__clientlist:
+                        if client[2] == receiver:
+                            receiveradress= (client[0], client[1])
+                    self._clientadresschat = (addmsg[1], addmsg[2])
+                    print(addmsg[1])
+                    print(addmsg[2])
                     print(addmsg[3])
-                    reply = input("Reply:  ")
+                    print(*receiveradress)
+                    clientadresschat = (receiveradress[0], int(receiveradress[1]))
+                    backadress =(addmsg[1], int(addmsg[2])) #the adress of the client that asked to chat
+                    #reply = input("Reply:  ")
+                    reply = ('chat {} {} {} {}'.format(receiveradress[0], int(receiveradress[1]), receiver, ''))
                     if reply == '/endchat':
                         print('Conversation closed')
                     else:
                         msgreply = reply.encode()
                         totalsent = 0
                         while totalsent < len(msgreply):
-                            sent = self.__s.sendto(msgreply[totalsent:], clientadresschat)
+                            sent = self.__s.sendto(msgreply[totalsent:], backadress)
                             totalsent += sent
-                    
+                if addmsg[0] == 'chat':
+
+                    backadress = addmsg[1], int(addmsg[2])
+                    backclient = addmsg[3]
+                    message = addmsg[4]
+                    print(backclient, ' : ', message)
+
+
+                    print('ouaip')
+                    #self._clientadresschat = (addmsg[1], addmsg[2])
+
+                    print(backadress)
+
+                    #clientadresschat = (receiveradress[0], int(receiveradress[1]))
+                    #clientadresschat =(addmsg[1])
+
+                    #inmsg = input("Reply:  ")
+                    inmsg = 'lolo'
+                    reply = ('chat {} {} {}'.format(self.__myadress[0],self.__myadress[1], self.__clientpseudo, inmsg))
+                    if reply == '/endchat':
+                        print('Conversation closed')
+                    else:
+                        msgreply = reply.encode()
+                        totalsent = 0
+                        while totalsent < len(msgreply):
+                            sent = self.__s.sendto(msgreply[totalsent:], backadress)
+                            totalsent += sent
+
+
             except socket.timeout:
                 pass
             except OSError:
                 return
+
+    def _startchat(self, receiver):
+        if self.__serveradress is not None:
+            try:
+                param = 'startchat {} {} {}'.format(self.__myadress[0], self.__myadress[1], receiver)
+                message = param.encode()
+                totalsent = 0
+
+                while totalsent < len(message):
+                    sent = self.__s.sendto(message[totalsent:], self.__serveradress)
+                    totalsent += sent
+            except OSError:
+                print('Erreur lors de la réception du message.')
+
+
+
     def _register(self, pseudo):
         if self.__serveradress is not None:
             try:
@@ -131,7 +187,7 @@ class Chat:
             except OSError:
                 print('Erreur lors de la réception du message.')
 
-                
+
     def _connected(self):
         if self.__serveradress is not None:
             try:
@@ -142,7 +198,7 @@ class Chat:
                     sent = self.__s.sendto(message[totalsent:], self.__serveradress)
                     totalsent += sent
             except OSError:
-                print('Erreur lors de la réception du message.') 
+                print('Erreur lors de la réception du message.')
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
