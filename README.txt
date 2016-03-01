@@ -3,7 +3,7 @@ Donc ouvrez une invite de commande.
 1) lancer le serveur: py serverdirectory.py
 
 2)Dans une autre invite de commande (une par client), lancer des clients avec votre adresse locale 
-( vous pouvez la trouver en tapant ipconfig, je prendre 192.168.1.3 comme exemple) suivi du port
+( vous pouvez la trouver en tapant ipconfig --> IPv4 Address, par exemple: 192.168.1.3) suivi du port
 que vous voulez du moment qu'il ne soit pas utilisé 
 ( pas 5000 car c'est le port du serveur): py serverdirectory.py 192.168.1.3 5001
 
@@ -12,7 +12,7 @@ que vous voulez du moment qu'il ne soit pas utilisé
 4) vous voyez donc que pour vous enregistrer avec votre pseudo (pseudo d'exemple: snowden) 
 il faut taper : /register snowden
 
-5) pour voir qui est connecter: /connected
+5) pour voir qui est connecté: /connected
 
 6) choisissez l'homme ou la femme (ici l'exemple sera: vador) avec qui vous voulez faire connaissance 
 ( en vue d'un date, qui sait) en tapant: /chat vador
